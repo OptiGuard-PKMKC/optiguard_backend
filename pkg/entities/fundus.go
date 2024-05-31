@@ -21,7 +21,7 @@ type FundusDetail struct {
 type FundusFeedback struct {
 	ID        int64     `json:"id"`
 	FundusID  int64     `json:"fundus_id"`
-	DoctorID  int64     `json:"doctor_id`
+	DoctorID  int64     `json:"doctor_id"`
 	Verified  bool      `json:"verified"`
 	Notes     string    `json:"notes"`
 	CreatedAt time.Time `json:"created_at"`

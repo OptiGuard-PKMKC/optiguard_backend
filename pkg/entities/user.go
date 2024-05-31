@@ -17,3 +17,8 @@ type User struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
+
+type UserRole struct {
+	ID       int    `json:"id"`
+	RoleName string `json:"role_name"`
+}
