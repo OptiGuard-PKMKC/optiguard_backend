@@ -44,6 +44,6 @@ func NewConnection(env *config.Env) (*sql.DB, error) {
 		return nil, err
 	}
 
-	log.Println("Connected to database")
+	log.Println("Connected to postgres database")
 	return db, nil
 }
