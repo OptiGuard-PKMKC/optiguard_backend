@@ -8,14 +8,7 @@ import (
 	"github.com/OptiGuard-PKMKC/optiguard_backend/internal/interfaces/response"
 	"github.com/OptiGuard-PKMKC/optiguard_backend/pkg/helpers"
 	usecase_intf "github.com/OptiGuard-PKMKC/optiguard_backend/pkg/usecases/interfaces"
-	"github.com/go-playground/validator/v10"
 )
-
-var validate *validator.Validate
-
-func init() {
-	validate = validator.New()
-}
 
 type AuthController struct {
 	authUsecase usecase_intf.AuthUsecase

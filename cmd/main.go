@@ -27,11 +27,14 @@ func main() {
 	userRepo := repositories.NewDbUserRepository(db)
 
 	authUsecase := usecases.NewAuthUsecase(env.SecretKey, userRepo)
+	userUsecase := usecases.NewUserUsecase(userRepo)
 
 	authController := controllers.NewAuthController(authUsecase)
+	userController := controllers.NewUserController(userUsecase)
 
-	router := routes.SetupRouter(route_intf.Controllers{
+	router := routes.SetupRouter(env.SecretKey, route_intf.Controllers{
 		Auth: authController,
+		User: userController,
 	})
 
 	helloHandler := func(w http.ResponseWriter, r *http.Request) {
@@ -41,10 +44,9 @@ func main() {
 
 	port := fmt.Sprintf(":%s", env.AppPort)
 
+	log.Println("Server started at: ", env.AppPort)
 	err = http.ListenAndServe(port, router)
 	if err != nil {
 		log.Println("Failed to start server: ", err)
 	}
-
-	log.Println("Server started at: ", env.AppPort)
 }

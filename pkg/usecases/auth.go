@@ -92,6 +92,7 @@ func (u *AuthUsecase) Register(p *request.Register) (*response.Register, error) 
 		ExpiredInMinute: 60,
 		SecretKey:       u.secretKey,
 		UserID:          user.ID,
+		UserRole:        role.RoleName,
 	}
 
 	resultJWT, err := helpers.GenerateJWT(&paramsJWT)
@@ -131,6 +132,7 @@ func (u *AuthUsecase) Login(p *request.Login) (*response.Login, error) {
 		ExpiredInMinute: 60,
 		SecretKey:       u.secretKey,
 		UserID:          user.ID,
+		UserRole:        user.RoleName,
 	}
 
 	resultJWT, err := helpers.GenerateJWT(&paramsJWT)

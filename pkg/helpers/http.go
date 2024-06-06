@@ -2,9 +2,13 @@ package helpers
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"log"
 	"net/http"
+
+	middleware_intf "github.com/OptiGuard-PKMKC/optiguard_backend/internal/http/middleware/interfaces"
+	"github.com/OptiGuard-PKMKC/optiguard_backend/internal/interfaces/response"
 )
 
 func JsonBodyDecoder(body io.ReadCloser, req any) error {
@@ -26,4 +30,22 @@ func SendResponse(w http.ResponseWriter, response interface{}, status int) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	w.Write(res)
+}
+
+func GetCurrentUser(r *http.Request) (*response.CurrentUser, error) {
+	// Extract values from context
+	userID, ok := r.Context().Value(middleware_intf.ContextKey.UserID).(int64)
+	if !ok {
+		return nil, errors.New("user id is required or invalid")
+	}
+
+	userRole, ok := r.Context().Value(middleware_intf.ContextKey.UserRole).(string)
+	if !ok {
+		return nil, errors.New("user role is required or invalid")
+	}
+
+	return &response.CurrentUser{
+		ID:   userID,
+		Role: userRole,
+	}, nil
 }
