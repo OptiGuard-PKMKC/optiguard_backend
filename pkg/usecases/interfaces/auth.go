@@ -1,29 +1,12 @@
 package usecase_intf
 
-type (
-	ParamsRegister struct {
-		Name            string
-		Email           string
-		Password        string
-		ConfirmPassword string
-	}
-
-	ParamsLogin struct {
-		Email    string
-		Password string
-	}
-)
-
-type (
-	ResultLogin struct {
-		Name        string `json:"name"`
-		Role        string `json:"role"`
-		Email       string `json:"email"`
-		AccessToken string `json:"access_token"`
-	}
+import (
+	"github.com/OptiGuard-PKMKC/optiguard_backend/internal/interfaces/request"
+	"github.com/OptiGuard-PKMKC/optiguard_backend/internal/interfaces/response"
 )
 
 type AuthUsecase interface {
-	Register(p *ParamsRegister) (int64, error)
-	Login(p *ParamsLogin) (*ResultLogin, error)
+	RegisterValidate(p *request.RegisterValidate) error
+	Register(p *request.Register) (*response.Register, error)
+	Login(p *request.Login) (*response.Login, error)
 }

@@ -9,6 +9,7 @@ type UserRepository interface {
 	FindAll() ([]entities.User, error)
 	FindByID(int) (*entities.User, error)
 	FindByEmail(string) (*entities.User, error)
+	GetRoleID(string) (*entities.UserRole, error)
 	Update(*entities.User) (*entities.User, error)
 	Delete(int) error
 }
