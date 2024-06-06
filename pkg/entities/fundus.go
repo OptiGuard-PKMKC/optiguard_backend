@@ -23,6 +23,7 @@ type FundusFeedback struct {
 	FundusID  int64     `json:"fundus_id"`
 	DoctorID  int64     `json:"doctor_id"`
 	Verified  bool      `json:"verified"`
+	Status    string    `json:"status"`
 	Notes     string    `json:"notes"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
