@@ -48,6 +48,21 @@ func (r *DbUserRepository) FindByID(id int64) (*entities.User, error) {
 	return &user, nil
 }
 
+func (r *DbUserRepository) FindByIDAndRole(user_id int64, role string) (*entities.User, error) {
+	query := `SELECT u.*, ur.role_name FROM users u JOIN user_roles ur ON u.role_id = ur.id WHERE u.id = $1 AND ur.role_name = $2`
+
+	var user entities.User
+	err := r.DB.QueryRow(query, user_id, role).Scan(&user.ID, &user.Name, &user.Email, &user.Phone, &user.Password, &user.RoleID, &user.Birthdate.Time, &user.Gender, &user.City, &user.Province, &user.Address, &user.CreatedAt, &user.UpdatedAt, &user.RoleName)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return &user, nil
+}
+
 func (r *DbUserRepository) FindByEmail(email string) (*entities.User, error) {
 	query := `SELECT u.*, ur.role_name FROM users u JOIN user_roles ur ON u.role_id = ur.id WHERE email = $1`
 

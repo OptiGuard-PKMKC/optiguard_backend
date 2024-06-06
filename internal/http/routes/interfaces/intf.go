@@ -5,6 +5,7 @@ import (
 )
 
 type Controllers struct {
-	Auth controller_intf.AuthController
-	User controller_intf.UserController
+	Auth   controller_intf.AuthController
+	Fundus controller_intf.FundusController
+	User   controller_intf.UserController
 }

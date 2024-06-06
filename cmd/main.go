@@ -25,16 +25,20 @@ func main() {
 	}
 
 	userRepo := repositories.NewDbUserRepository(db)
+	fundusRepo := repositories.NewDbFundusRepository(db)
 
 	authUsecase := usecases.NewAuthUsecase(env.SecretKey, userRepo)
+	fundusUsecase := usecases.NewFundusUsecase(env.MlApiKey, fundusRepo, userRepo)
 	userUsecase := usecases.NewUserUsecase(userRepo)
 
 	authController := controllers.NewAuthController(authUsecase)
+	fundusController := controllers.NewFundusController(fundusUsecase)
 	userController := controllers.NewUserController(userUsecase)
 
 	router := routes.SetupRouter(env.SecretKey, route_intf.Controllers{
-		Auth: authController,
-		User: userController,
+		Auth:   authController,
+		Fundus: fundusController,
+		User:   userController,
 	})
 
 	helloHandler := func(w http.ResponseWriter, r *http.Request) {
