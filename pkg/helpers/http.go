@@ -9,6 +9,7 @@ import (
 
 	middleware_intf "github.com/OptiGuard-PKMKC/optiguard_backend/internal/http/middleware/interfaces"
 	"github.com/OptiGuard-PKMKC/optiguard_backend/internal/interfaces/response"
+	"github.com/gorilla/mux"
 )
 
 func JsonBodyDecoder(body io.ReadCloser, req any) error {
@@ -48,4 +49,8 @@ func GetCurrentUser(r *http.Request) (*response.CurrentUser, error) {
 		ID:   userID,
 		Role: userRole,
 	}, nil
+}
+
+func UrlVars(r *http.Request, key string) string {
+	return mux.Vars(r)[key]
 }

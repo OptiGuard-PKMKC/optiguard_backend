@@ -59,3 +59,42 @@ func (c *FundusController) DetectImage(w http.ResponseWriter, r *http.Request) {
 
 	helpers.SendResponse(w, res, http.StatusCreated)
 }
+
+func (c *FundusController) ViewFundus(w http.ResponseWriter, r *http.Request) {
+	id, err := helpers.StringToInt64(helpers.UrlVars(r, "id"))
+	if err != nil {
+		helpers.SendResponse(w, response.Response{
+			Status:  "error",
+			Message: "Invalid fundus ID",
+			Error:   err.Error(),
+		}, http.StatusBadRequest)
+		return
+	}
+
+	fundus, err := c.fundusUsecase.ViewFundus(*id)
+	if err != nil {
+		helpers.SendResponse(w, response.Response{
+			Status: "error",
+			Error:  err.Error(),
+		}, http.StatusInternalServerError)
+		return
+	}
+
+	helpers.SendResponse(w, response.Response{
+		Status:  "success",
+		Message: "View fundus success",
+		Data:    fundus,
+	}, http.StatusOK)
+}
+
+func (c *FundusController) DeleteFundus(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (c *FundusController) RequestVerifyFundusByPatient(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (c *FundusController) VerifyFundusByDoctor(w http.ResponseWriter, r *http.Request) {
+
+}

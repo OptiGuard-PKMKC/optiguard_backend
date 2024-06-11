@@ -3,13 +3,16 @@ package entities
 import "time"
 
 type Fundus struct {
-	ID        int64     `json:"id"`
-	PatientID int64     `json:"patient_id"`
-	ImageURL  string    `json:"image_url"`
-	Verified  bool      `json:"verified"`
-	Status    string    `json:"status"`
-	Condition string    `json:"condition"`
-	CreatedAt time.Time `json:"created_at"`
+	ID        int64             `json:"id"`
+	PatientID int64             `json:"patient_id"`
+	ImageURL  string            `json:"image_url"`
+	Verified  bool              `json:"verified"`
+	Status    string            `json:"status"`
+	Condition string            `json:"condition"`
+	CreatedAt time.Time         `json:"created_at"`
+	UpdatedAt time.Time         `json:"updated_at"`
+	Detail    []*FundusDetail   `json:"details"`
+	Feedback  []*FundusFeedback `json:"feedbacks,omitempty"`
 }
 
 type FundusDetail struct {

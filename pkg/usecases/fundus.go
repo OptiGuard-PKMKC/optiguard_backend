@@ -5,7 +5,6 @@ import (
 	"log"
 
 	"github.com/OptiGuard-PKMKC/optiguard_backend/internal/interfaces/request"
-	"github.com/OptiGuard-PKMKC/optiguard_backend/internal/interfaces/response"
 	"github.com/OptiGuard-PKMKC/optiguard_backend/pkg/entities"
 	"github.com/OptiGuard-PKMKC/optiguard_backend/pkg/helpers"
 	repo_intf "github.com/OptiGuard-PKMKC/optiguard_backend/pkg/repositories/interfaces"
@@ -85,7 +84,15 @@ func (u *FundusUsecase) DetectImage(p *request.DetectFundusImage) (int64, error)
 	return fundusID, nil
 }
 
-func (u *FundusUsecase) ViewFundus(fundusID int64) (*response.Fundus, error) { return nil, nil }
+func (u *FundusUsecase) ViewFundus(fundusID int64) (*entities.Fundus, error) {
+	fundus, err := u.fundusRepo.FindByID(fundusID)
+	if err != nil {
+		return nil, errors.New("failed to find fundus record")
+	}
+
+	return fundus, nil
+}
+
 func (u *FundusUsecase) FundusHistory(userID int64) ([]*entities.Fundus, error) {
 	return nil, nil
 }

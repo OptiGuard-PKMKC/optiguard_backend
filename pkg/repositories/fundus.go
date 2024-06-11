@@ -62,10 +62,99 @@ func (r *DbFundusRepository) Create(fundus *entities.Fundus, details []*entities
 	return fundusID, nil
 }
 
-func (r *DbFundusRepository) CreateFeedback() error     { return nil }
-func (r *DbFundusRepository) FindAll() error            { return nil }
-func (r *DbFundusRepository) FindByID() error           { return nil }
-func (r *DbFundusRepository) FindByIDVerified() error   { return nil }
-func (r *DbFundusRepository) Delete() error             { return nil }
-func (r *DbFundusRepository) DeleteFeedback() error     { return nil }
-func (r *DbFundusRepository) UpdateVerifyDoctor() error { return nil }
+func (r *DbFundusRepository) CreateFeedback(feedback []*entities.FundusFeedback) error {
+	query := `INSERT INTO fundus_feedbacks (fundus_id, doctor_id, notes) VALUES ($1, $2, $3)`
+
+	for _, fb := range feedback {
+		_, err := r.DB.Exec(query, fb.FundusID, fb.DoctorID, fb.Notes)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (r *DbFundusRepository) FindAll() error { return nil }
+
+func (r *DbFundusRepository) FindByID(id int64) (*entities.Fundus, error) {
+	query := `SELECT * FROM funduses WHERE id = $1`
+
+	var fundus entities.Fundus
+	err := r.DB.QueryRow(query, id).Scan(&fundus.ID, &fundus.PatientID, &fundus.ImageURL, &fundus.Verified, &fundus.Status, &fundus.Condition, &fundus.CreatedAt, &fundus.UpdatedAt)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	details, err := r.FindFundusDetails(fundus.ID)
+	if err != nil {
+		return nil, err
+	}
+	fundus.Detail = details
+
+	feedbacks, err := r.FindFundusFeedbacks(fundus.ID)
+	if err != nil {
+		return nil, err
+	}
+	fundus.Feedback = feedbacks
+
+	return &fundus, nil
+}
+
+func (r *DbFundusRepository) FindFundusDetails(fundus_id int64) ([]*entities.FundusDetail, error) {
+	query := `SELECT * FROM fundus_details WHERE fundus_id = $1`
+
+	rows, err := r.DB.Query(query, fundus_id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	fundusDetails := []*entities.FundusDetail{}
+	for rows.Next() {
+		detail := entities.FundusDetail{}
+		if err := rows.Scan(&detail.ID, &detail.FundusID, &detail.Disease, &detail.ConfidenceScore, &detail.Description); err != nil {
+			return nil, err
+		}
+		fundusDetails = append(fundusDetails, &detail)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return fundusDetails, nil
+}
+
+func (r *DbFundusRepository) FindFundusFeedbacks(fundus_id int64) ([]*entities.FundusFeedback, error) {
+	query := `SELECT * FROM fundus_feedbacks WHERE fundus_id = $1`
+
+	rows, err := r.DB.Query(query, fundus_id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Next()
+
+	fundusFeedbacks := []*entities.FundusFeedback{}
+	for rows.Next() {
+		feedback := entities.FundusFeedback{}
+		if err := rows.Scan(&feedback.ID, &feedback.FundusID, &feedback.DoctorID, &feedback.Notes, &feedback.CreatedAt, &feedback.UpdatedAt); err != nil {
+			return nil, err
+		}
+		fundusFeedbacks = append(fundusFeedbacks, &feedback)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return fundusFeedbacks, nil
+}
+
+func (r *DbFundusRepository) FindByIDVerified() error { return nil }
+func (r *DbFundusRepository) Delete() error           { return nil }
+func (r *DbFundusRepository) DeleteFeedback() error   { return nil }
+func (r *DbFundusRepository) UpdateVerify() error {
+	return nil
+}
