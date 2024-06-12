@@ -88,7 +88,28 @@ func (c *FundusController) ViewFundus(w http.ResponseWriter, r *http.Request) {
 }
 
 func (c *FundusController) DeleteFundus(w http.ResponseWriter, r *http.Request) {
+	id, err := helpers.StringToInt64(helpers.UrlVars(r, "id"))
+	if err != nil {
+		helpers.SendResponse(w, response.Response{
+			Status:  "error",
+			Message: "Invalid fundus ID",
+			Error:   err.Error(),
+		}, http.StatusBadRequest)
+		return
+	}
 
+	if err = c.fundusUsecase.DeleteFundus(*id); err != nil {
+		helpers.SendResponse(w, response.Response{
+			Status: "error",
+			Error:  err.Error(),
+		}, http.StatusInternalServerError)
+		return
+	}
+
+	helpers.SendResponse(w, response.Response{
+		Status:  "success",
+		Message: "Delete fundus success",
+	}, http.StatusOK)
 }
 
 func (c *FundusController) RequestVerifyFundusByPatient(w http.ResponseWriter, r *http.Request) {
@@ -96,5 +117,37 @@ func (c *FundusController) RequestVerifyFundusByPatient(w http.ResponseWriter, r
 }
 
 func (c *FundusController) VerifyFundusByDoctor(w http.ResponseWriter, r *http.Request) {
+	fundusID, err := helpers.StringToInt64(helpers.UrlVars(r, "id"))
+	if err != nil {
+		helpers.SendResponse(w, response.Response{
+			Status:  "error",
+			Message: "Invalid fundus ID",
+			Error:   err.Error(),
+		}, http.StatusBadRequest)
+		return
+	}
 
+	req := request.VerifyFundus{}
+	if err := helpers.JsonBodyDecoder(r.Body, &req); err != nil {
+		helpers.SendResponse(w, response.Response{
+			Status:  "error",
+			Message: "Failed to parse request body",
+			Error:   err.Error(),
+		}, http.StatusBadRequest)
+		return
+	}
+
+	err = c.fundusUsecase.VerifyFundusByDoctor(int(*fundusID), int(req.DoctorID), req.Status, req.Feedbacks)
+	if err != nil {
+		helpers.SendResponse(w, response.Response{
+			Status:  "error",
+			Message: "Failed to verify fundus",
+			Error:   err.Error(),
+		}, http.StatusInternalServerError)
+	}
+
+	helpers.SendResponse(w, response.Response{
+		Status:  "success",
+		Message: "Verify fundus success",
+	}, http.StatusOK)
 }

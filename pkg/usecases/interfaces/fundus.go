@@ -10,6 +10,6 @@ type FundusUsecase interface {
 	ViewFundus(fundusID int64) (*entities.Fundus, error)
 	FundusHistory(userID int64) ([]*entities.Fundus, error)
 	RequestVerifyFundusByPatient() error
-	VerifyFundusByDoctor() error
-	DeleteFundus() error
+	VerifyFundusByDoctor(fundusID, doctorID int, status string, feedbacks []string) error
+	DeleteFundus(fundusID int64) error
 }

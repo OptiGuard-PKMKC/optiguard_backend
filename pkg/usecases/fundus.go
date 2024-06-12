@@ -97,5 +97,33 @@ func (u *FundusUsecase) FundusHistory(userID int64) ([]*entities.Fundus, error) 
 	return nil, nil
 }
 func (u *FundusUsecase) RequestVerifyFundusByPatient() error { return nil }
-func (u *FundusUsecase) VerifyFundusByDoctor() error         { return nil }
-func (u *FundusUsecase) DeleteFundus() error                 { return nil }
+
+func (u *FundusUsecase) VerifyFundusByDoctor(fundusID, doctorID int, status string, feedbacks []string) error {
+	feedbacksEntity := []entities.FundusFeedback{}
+	for _, fb := range feedbacks {
+		feedback := &entities.FundusFeedback{
+			FundusID: int64(fundusID),
+			DoctorID: int64(doctorID),
+			Notes:    fb,
+		}
+
+		feedbacksEntity = append(feedbacksEntity, *feedback)
+	}
+
+	if err := u.fundusRepo.CreateFeedback(feedbacksEntity); err != nil {
+		return errors.New("failed storing feedbacks")
+	}
+
+	if err := u.fundusRepo.UpdateVerify(fundusID, doctorID, status); err != nil {
+		return errors.New("failed to verify fundus")
+	}
+
+	return nil
+}
+
+func (u *FundusUsecase) DeleteFundus(fundusID int64) error {
+	if err := u.fundusRepo.Delete(fundusID); err != nil {
+		return err
+	}
+	return nil
+}

@@ -62,7 +62,7 @@ func (r *DbFundusRepository) Create(fundus *entities.Fundus, details []*entities
 	return fundusID, nil
 }
 
-func (r *DbFundusRepository) CreateFeedback(feedback []*entities.FundusFeedback) error {
+func (r *DbFundusRepository) CreateFeedback(feedback []entities.FundusFeedback) error {
 	query := `INSERT INTO fundus_feedbacks (fundus_id, doctor_id, notes) VALUES ($1, $2, $3)`
 
 	for _, fb := range feedback {
@@ -104,10 +104,10 @@ func (r *DbFundusRepository) FindByID(id int64) (*entities.Fundus, error) {
 	return &fundus, nil
 }
 
-func (r *DbFundusRepository) FindFundusDetails(fundus_id int64) ([]*entities.FundusDetail, error) {
+func (r *DbFundusRepository) FindFundusDetails(fundusID int64) ([]*entities.FundusDetail, error) {
 	query := `SELECT * FROM fundus_details WHERE fundus_id = $1`
 
-	rows, err := r.DB.Query(query, fundus_id)
+	rows, err := r.DB.Query(query, fundusID)
 	if err != nil {
 		return nil, err
 	}
@@ -128,10 +128,10 @@ func (r *DbFundusRepository) FindFundusDetails(fundus_id int64) ([]*entities.Fun
 	return fundusDetails, nil
 }
 
-func (r *DbFundusRepository) FindFundusFeedbacks(fundus_id int64) ([]*entities.FundusFeedback, error) {
+func (r *DbFundusRepository) FindFundusFeedbacks(fundusID int64) ([]*entities.FundusFeedback, error) {
 	query := `SELECT * FROM fundus_feedbacks WHERE fundus_id = $1`
 
-	rows, err := r.DB.Query(query, fundus_id)
+	rows, err := r.DB.Query(query, fundusID)
 	if err != nil {
 		return nil, err
 	}
@@ -153,8 +153,26 @@ func (r *DbFundusRepository) FindFundusFeedbacks(fundus_id int64) ([]*entities.F
 }
 
 func (r *DbFundusRepository) FindByIDVerified() error { return nil }
-func (r *DbFundusRepository) Delete() error           { return nil }
-func (r *DbFundusRepository) DeleteFeedback() error   { return nil }
-func (r *DbFundusRepository) UpdateVerify() error {
+
+func (r *DbFundusRepository) Delete(id int64) error {
+	query := `DELETE FROM funduses WHERE id = $1`
+	_, err := r.DB.Exec(query, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *DbFundusRepository) DeleteFeedback() error { return nil }
+
+func (r *DbFundusRepository) UpdateVerify(fundusID, doctorID int, status string) error {
+	query := `UPDATE funduses SET verified = $1, verified_by = $2, status = $3 WHERE id = $4`
+
+	_, err := r.DB.Exec(query, true, doctorID, status, fundusID)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

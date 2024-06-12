@@ -28,7 +28,7 @@ func FundusRoutes(router *mux.Router, controller route_intf.Controllers, secretK
 	/*
 		@route /fundus/verify/{id}
 		@method POST
-		@body { "doctor_id", "patient_id", "status", "[]feedbacks" }
+		@body { "doctor_id", "status", "[]feedbacks" }
 	*/
 
 	/*
