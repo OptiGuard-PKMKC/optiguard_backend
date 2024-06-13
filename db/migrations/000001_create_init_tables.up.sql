@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS doctor_profiles {
     CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id)
 };
 
-CREATE TABLE IF NOT EXISTS doctor_availabilities {
+CREATE TABLE IF NOT EXISTS doctor_schedules {
     id SERIAL PRIMARY KEY,
     doctor_id INTEGER NOT NULL,
     day_of_week INTEGER NOT NULL,

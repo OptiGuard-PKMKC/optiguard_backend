@@ -31,3 +31,7 @@ type UserUsecase interface {
 	GetProfile(userID int64) (*response.GetProfile, error)
 	UpdateProfile() error
 }
+
+type DoctorUsecase interface {
+	CreateSchedule(userID int64, params []*request.CreateDoctorSchedule) error
+}

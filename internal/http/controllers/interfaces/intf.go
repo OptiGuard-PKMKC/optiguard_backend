@@ -27,3 +27,7 @@ type FundusController interface {
 type UserController interface {
 	Profile(w http.ResponseWriter, r *http.Request)
 }
+
+type DoctorController interface {
+	CreateSchedule(w http.ResponseWriter, r *http.Request)
+}

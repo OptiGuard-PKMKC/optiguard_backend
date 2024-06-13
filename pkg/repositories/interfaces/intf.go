@@ -32,3 +32,7 @@ type UserRepository interface {
 	Update(*entities.User) (*entities.User, error)
 	Delete(int) error
 }
+
+type DoctorRepository interface {
+	CreateSchedule(schedules []*entities.DoctorSchedule) error
+}

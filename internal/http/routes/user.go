@@ -22,17 +22,17 @@ func UserRoutes(router *mux.Router, controller route_intf.Controllers, secretKey
 	*/
 
 	/*
-		@desc Create schedule for doctor
+		@desc Create available schedule for doctor
 		@route /user/doctor/schedule
 		@method POST
-		@body { "start_day", "end_day", "start_hour", "end_hour" }
+		@body []{ "day", "start_hour", "end_hour" }
 	*/
 
 	/*
 		@desc Update schedule for doctor
 		@route /user/doctor/schedule
 		@method PUT
-		@body { "start_day", "end_day", "start_hour", "end_hour" }
+		@body { "id" }
 	*/
 
 	/*
