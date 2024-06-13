@@ -10,10 +10,14 @@ import (
 
 func AppointmentRoutes(router *mux.Router, controller route_intf.Controllers, secretKey string) {
 	// Protected routes
+	/*
+		@route /appointment
+		@method GET
+	*/
 	router.Handle(
 		"/appointment",
 		middleware.Authentication(secretKey, http.HandlerFunc(controller.User.Profile)),
-	).Methods("POST")
+	).Methods("GET")
 
 	/*
 		@desc Create appointment
@@ -21,6 +25,10 @@ func AppointmentRoutes(router *mux.Router, controller route_intf.Controllers, se
 		@method POST
 		@body { "doctor_id", "date", "start_hour", "end_hour" }
 	*/
+	router.Handle(
+		"/appointment",
+		middleware.Authentication(secretKey, http.HandlerFunc(controller.Appointment.Create)),
+	).Methods("POST")
 
 	/*
 		@desc Confirm appointment by doctor

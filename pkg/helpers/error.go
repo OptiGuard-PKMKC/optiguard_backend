@@ -1,6 +1,11 @@
 package helpers
 
-import "github.com/go-playground/validator/v10"
+import (
+	"net/http"
+
+	"github.com/OptiGuard-PKMKC/optiguard_backend/internal/interfaces/response"
+	"github.com/go-playground/validator/v10"
+)
 
 func GetValidationErrors(err error) map[string]string {
 	validationErrors := err.(validator.ValidationErrors)
@@ -10,4 +15,20 @@ func GetValidationErrors(err error) map[string]string {
 	}
 
 	return errorsMap
+}
+
+func FailedParsingBody(w http.ResponseWriter, err error) {
+	SendResponse(w, response.Response{
+		Status:  "error",
+		Message: "Failed to parse request body",
+		Error:   err.Error(),
+	}, http.StatusBadRequest)
+}
+
+func FailedGetCurrentUser(w http.ResponseWriter, err error) {
+	SendResponse(w, response.Response{
+		Status:  "error",
+		Message: "Failed to get current user",
+		Error:   err.Error(),
+	}, http.StatusBadRequest)
 }

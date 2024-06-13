@@ -26,19 +26,23 @@ func main() {
 
 	userRepo := repositories.NewDbUserRepository(db)
 	fundusRepo := repositories.NewDbFundusRepository(db)
+	aptRepo := repositories.NewDbAppointmentRepository(db)
 
 	authUsecase := usecases.NewAuthUsecase(env.SecretKey, userRepo)
+	aptUsecase := usecases.NewAppointmentUsecase(aptRepo)
 	fundusUsecase := usecases.NewFundusUsecase(env.MlApiKey, fundusRepo, userRepo)
 	userUsecase := usecases.NewUserUsecase(userRepo)
 
 	authController := controllers.NewAuthController(authUsecase)
+	aptController := controllers.NewAppointmentController(aptUsecase)
 	fundusController := controllers.NewFundusController(fundusUsecase)
 	userController := controllers.NewUserController(userUsecase)
 
 	router := routes.SetupRouter(env.SecretKey, route_intf.Controllers{
-		Auth:   authController,
-		Fundus: fundusController,
-		User:   userController,
+		Auth:        authController,
+		Appointment: aptController,
+		Fundus:      fundusController,
+		User:        userController,
 	})
 
 	helloHandler := func(w http.ResponseWriter, r *http.Request) {

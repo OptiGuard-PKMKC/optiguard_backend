@@ -30,15 +30,17 @@ func FundusRoutes(router *mux.Router, controller route_intf.Controllers, secretK
 		@method POST
 		@body { "doctor_id", "status", "[]feedbacks" }
 	*/
+	router.Handle(
+		"/fundus/verify/{id}",
+		middleware.Authentication(secretKey, http.HandlerFunc(controller.Fundus.VerifyFundusByDoctor)),
+	).Methods("POST")
 
 	/*
 		@route /fundus/{id}
 		@method DELETE
 	*/
-
-	/*
-		@route /fundus/feedback/{id}
-		@method PUT
-		@body { "doctor_id", "patient_id", "status", "[]feedbacks" }
-	*/
+	router.Handle(
+		"/fundus/{id}",
+		middleware.Authentication(secretKey, http.HandlerFunc(controller.Fundus.DeleteFundus)),
+	).Methods("DELETE")
 }

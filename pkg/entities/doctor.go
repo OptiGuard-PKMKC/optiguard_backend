@@ -26,3 +26,14 @@ type DoctorEducation struct {
 	StartDate  time.Time `json:"start_date"`
 	EndDate    time.Time `json:"end_date"`
 }
+
+type DoctorSchedule struct {
+	ID        int64     `json:"id"`
+	ProfileID int64     `json:"profile_id"`
+	StartDay  string    `json:"start_day"`
+	EndDay    string    `json:"end_day"`
+	StartHour time.Time `json:"start_hour"`
+	EndHour   time.Time `json:"end_hour"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
