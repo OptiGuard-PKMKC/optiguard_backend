@@ -5,6 +5,7 @@ import "github.com/OptiGuard-PKMKC/optiguard_backend/pkg/entities"
 type AppointmentRepository interface {
 	Create(apt *entities.Appointment) error
 	FindAll(doctorID *int64, patientID *int64) ([]*entities.Appointment, error)
+	UpdateStatus(aptID int64, status string) error
 	Delete(id int64) error
 }
 

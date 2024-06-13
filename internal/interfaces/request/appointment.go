@@ -15,4 +15,8 @@ type (
 		UserID   int64
 		UserRole string
 	}
+
+	ConfirmAppointment struct {
+		Confirm bool `json:"confirm" validate:"required"`
+	}
 )

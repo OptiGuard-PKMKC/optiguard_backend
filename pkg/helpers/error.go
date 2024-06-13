@@ -32,3 +32,24 @@ func FailedGetCurrentUser(w http.ResponseWriter, err error) {
 		Error:   err.Error(),
 	}, http.StatusBadRequest)
 }
+
+func FailedGetUrlVars(w http.ResponseWriter, err error, msg *string) {
+	defaultMsg := "Failed to get url vars"
+	if msg == nil {
+		msg = &defaultMsg
+	}
+
+	SendResponse(w, response.Response{
+		Status:  "error",
+		Message: *msg,
+		Error:   err.Error(),
+	}, http.StatusBadRequest)
+}
+
+func FailedValidation(w http.ResponseWriter, err error) {
+	SendResponse(w, response.Response{
+		Status:  "error",
+		Message: "Validation error",
+		Error:   GetValidationErrors(err),
+	}, http.StatusBadRequest)
+}

@@ -50,3 +50,18 @@ func (u *AppointmentUsecase) FindAll(p *request.ViewAppointment) ([]*entities.Ap
 
 	return apts, nil
 }
+
+func (u *AppointmentUsecase) UpdateStatus(aptID int64, confirm bool) error {
+	var status string
+	if confirm {
+		status = "confirmed"
+	} else {
+		status = "rejected"
+	}
+
+	if err := u.aptRepo.UpdateStatus(aptID, status); err != nil {
+		return err
+	}
+
+	return nil
+}

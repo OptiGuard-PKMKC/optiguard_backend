@@ -15,6 +15,7 @@ type AuthUsecase interface {
 type AppointmentUsecase interface {
 	Create(p *request.CreateAppointment) error
 	FindAll(p *request.ViewAppointment) ([]*entities.Appointment, error)
+	UpdateStatus(aptID int64, confirm bool) error
 }
 
 type FundusUsecase interface {

@@ -59,6 +59,17 @@ func (r *DbAppointmentRepository) FindAll(doctorID *int64, patientID *int64) ([]
 	return apts, nil
 }
 
+func (r *DbAppointmentRepository) UpdateStatus(aptID int64, status string) error {
+	query := `UPDATE appointments SET status = $1 WHERE id = $2`
+
+	_, err := r.DB.Exec(query, status, aptID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (r *DbAppointmentRepository) Delete(id int64) error {
 	query := `DELETE FROM appointments WHERE id = $1`
 
