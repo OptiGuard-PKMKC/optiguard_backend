@@ -27,6 +27,10 @@ func UserRoutes(router *mux.Router, controller route_intf.Controllers, secretKey
 		@method POST
 		@body []{ "day", "start_hour", "end_hour" }
 	*/
+	router.Handle(
+		"/user/doctor/schedule",
+		middleware.Authentication(secretKey, http.HandlerFunc(controller.Doctor.CreateSchedule)),
+	).Methods("POST")
 
 	/*
 		@desc Update schedule for doctor

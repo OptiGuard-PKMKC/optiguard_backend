@@ -25,22 +25,26 @@ func main() {
 	}
 
 	userRepo := repositories.NewDbUserRepository(db)
+	doctorRepo := repositories.NewDbDoctorRepository(db)
 	fundusRepo := repositories.NewDbFundusRepository(db)
 	aptRepo := repositories.NewDbAppointmentRepository(db)
 
 	authUsecase := usecases.NewAuthUsecase(env.SecretKey, userRepo)
 	aptUsecase := usecases.NewAppointmentUsecase(aptRepo)
+	doctorUsecase := usecases.NewDoctorUsecase(doctorRepo)
 	fundusUsecase := usecases.NewFundusUsecase(env.MlApiKey, fundusRepo, userRepo)
 	userUsecase := usecases.NewUserUsecase(userRepo)
 
 	authController := controllers.NewAuthController(authUsecase)
 	aptController := controllers.NewAppointmentController(aptUsecase)
+	doctorController := controllers.NewDoctorController(doctorUsecase)
 	fundusController := controllers.NewFundusController(fundusUsecase)
 	userController := controllers.NewUserController(userUsecase)
 
 	router := routes.SetupRouter(env.SecretKey, route_intf.Controllers{
 		Auth:        authController,
 		Appointment: aptController,
+		Doctor:      doctorController,
 		Fundus:      fundusController,
 		User:        userController,
 	})

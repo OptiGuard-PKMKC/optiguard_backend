@@ -9,4 +9,5 @@ type Controllers struct {
 	Appointment controller_intf.AppointmentController
 	Fundus      controller_intf.FundusController
 	User        controller_intf.UserController
+	Doctor      controller_intf.DoctorController
 }
