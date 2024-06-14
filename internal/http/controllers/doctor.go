@@ -8,6 +8,7 @@ import (
 	"github.com/OptiGuard-PKMKC/optiguard_backend/internal/interfaces/response"
 	"github.com/OptiGuard-PKMKC/optiguard_backend/pkg/helpers"
 	usecase_intf "github.com/OptiGuard-PKMKC/optiguard_backend/pkg/usecases/interfaces"
+	"github.com/mitchellh/mapstructure"
 )
 
 type DoctorController struct {
@@ -18,6 +19,35 @@ func NewDoctorController(doctorUsecase usecase_intf.DoctorUsecase) controller_in
 	return &DoctorController{
 		doctorUsecase: doctorUsecase,
 	}
+}
+
+func (c *DoctorController) ViewAll(w http.ResponseWriter, r *http.Request) {
+	var filterQuery map[string]string
+	if err := helpers.QueryDecoder(r, &filterQuery); err != nil {
+		helpers.FailedParsingQuery(w, err)
+		return
+	}
+
+	filter := &request.FilterAppointmentSchedule{}
+	if err := mapstructure.Decode(filterQuery, filter); err != nil {
+		helpers.FailedParsingQuery(w, err)
+		return
+	}
+
+	doctors, err := c.doctorUsecase.FindAll(filter)
+	if err != nil {
+		helpers.SendResponse(w, response.Response{
+			Status: "error",
+			Error:  err.Error(),
+		}, http.StatusInternalServerError)
+		return
+	}
+
+	helpers.SendResponse(w, response.Response{
+		Status:  "success",
+		Message: "Fetch all doctors",
+		Data:    doctors,
+	}, http.StatusOK)
 }
 
 func (c *DoctorController) CreateSchedule(w http.ResponseWriter, r *http.Request) {

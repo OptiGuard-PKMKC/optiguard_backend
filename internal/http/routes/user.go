@@ -16,6 +16,16 @@ func UserRoutes(router *mux.Router, controller route_intf.Controllers, secretKey
 	).Methods("GET")
 
 	/*
+		@desc Get all doctor profile by patient
+		@route /user/doctor/profile?start_date={start_date}&end_date={end_date}&start_hour={start_hour}&end_hour={end_hour}
+		@method GET
+	*/
+	router.Handle(
+		"/user/doctor/profile",
+		middleware.Authentication(secretKey, http.HandlerFunc(controller.Doctor.ViewAll)),
+	).Methods("GET")
+
+	/*
 		@desc Get doctor profile by patient
 		@route /user/doctor/profile/{id}
 		@method GET

@@ -25,6 +25,14 @@ func FailedParsingBody(w http.ResponseWriter, err error) {
 	}, http.StatusBadRequest)
 }
 
+func FailedParsingQuery(w http.ResponseWriter, err error) {
+	SendResponse(w, response.Response{
+		Status:  "error",
+		Message: "Failed to parse query",
+		Error:   err.Error(),
+	}, http.StatusBadRequest)
+}
+
 func FailedGetCurrentUser(w http.ResponseWriter, err error) {
 	SendResponse(w, response.Response{
 		Status:  "error",

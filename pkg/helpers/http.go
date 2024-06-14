@@ -20,6 +20,17 @@ func JsonBodyDecoder(body io.ReadCloser, req any) error {
 	return nil
 }
 
+func QueryDecoder(r *http.Request, req *map[string]string) error {
+	queryParams := r.URL.Query()
+
+	for key, val := range queryParams {
+		if len(val) > 0 {
+			(*req)[key] = val[0]
+		}
+	}
+	return nil
+}
+
 func SendResponse(w http.ResponseWriter, response interface{}, status int) {
 	res, err := json.Marshal(response)
 	if err != nil {

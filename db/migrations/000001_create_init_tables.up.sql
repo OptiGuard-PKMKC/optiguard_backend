@@ -62,7 +62,9 @@ CREATE TABLE IF NOT EXISTS doctor_profiles {
     user_id INTEGER NOT NULL,
     specialization VARCHAR(255) NOT NULL,
     str_number VARCHAR(255) NOT NULL,
-    bio TEXT DEFAULT '',
+    bio_desc TEXT DEFAULT '',
+    work_years INTEGER DEFAULT 0,
+    rating INTEGER DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id)

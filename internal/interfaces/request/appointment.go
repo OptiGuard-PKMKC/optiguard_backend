@@ -19,4 +19,12 @@ type (
 	ConfirmAppointment struct {
 		Confirm bool `json:"confirm" validate:"required"`
 	}
+
+	FilterAppointmentSchedule struct {
+		DaysInt   []int            `json:"days_int"`
+		StartDate customtypes.Date `json:"start_date"`
+		EndDate   customtypes.Date `json:"end_date"`
+		StartHour string           `json:"start_hour"`
+		EndHour   string           `json:"end_hour"`
+	}
 )

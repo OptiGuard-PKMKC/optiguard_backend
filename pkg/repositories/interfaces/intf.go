@@ -1,6 +1,9 @@
 package repo_intf
 
-import "github.com/OptiGuard-PKMKC/optiguard_backend/pkg/entities"
+import (
+	"github.com/OptiGuard-PKMKC/optiguard_backend/internal/interfaces/request"
+	"github.com/OptiGuard-PKMKC/optiguard_backend/pkg/entities"
+)
 
 type AppointmentRepository interface {
 	Create(apt *entities.Appointment) error
@@ -34,5 +37,9 @@ type UserRepository interface {
 }
 
 type DoctorRepository interface {
+	FindAll(filter *request.FilterAppointmentSchedule) ([]*entities.DoctorProfile, error)
+	GetProfile(profileID int64) (*entities.DoctorProfile, error)
+	GetPractice(profileID int64) ([]*entities.DoctorPractice, error)
+	GetSchedule(profileID int64) ([]*entities.DoctorSchedule, error)
 	CreateSchedule(schedules []*entities.DoctorSchedule) error
 }

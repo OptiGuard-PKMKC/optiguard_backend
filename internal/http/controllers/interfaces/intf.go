@@ -29,5 +29,6 @@ type UserController interface {
 }
 
 type DoctorController interface {
+	ViewAll(w http.ResponseWriter, r *http.Request)
 	CreateSchedule(w http.ResponseWriter, r *http.Request)
 }
