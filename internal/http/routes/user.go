@@ -16,6 +16,17 @@ func UserRoutes(router *mux.Router, controller route_intf.Controllers, secretKey
 	).Methods("GET")
 
 	/*
+		@desc Create doctor profile
+		@route /user/doctor
+		@method POST
+		@body { "specialization", "str_number", "bio_desc" }
+	*/
+	router.Handle(
+		"/user/doctor",
+		middleware.Authentication(secretKey, http.HandlerFunc(controller.Doctor.CreateProfile)),
+	).Methods("POST")
+
+	/*
 		@desc Get all doctor profile by patient
 		@route /user/doctor/profile?start_date={start_date}&end_date={end_date}&start_hour={start_hour}&end_hour={end_hour}
 		@method GET
@@ -30,6 +41,10 @@ func UserRoutes(router *mux.Router, controller route_intf.Controllers, secretKey
 		@route /user/doctor/profile/{id}
 		@method GET
 	*/
+	router.Handle(
+		"/user/doctor/profile/{id}",
+		middleware.Authentication(secretKey, http.HandlerFunc(controller.Doctor.Profile)),
+	).Methods("GET")
 
 	/*
 		@desc Create available schedule for doctor

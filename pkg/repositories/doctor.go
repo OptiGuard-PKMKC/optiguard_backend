@@ -18,6 +18,17 @@ func NewDbDoctorRepository(db *sql.DB) repo_intf.DoctorRepository {
 	return &DbDoctorRepository{DB: db}
 }
 
+func (r *DbDoctorRepository) CreateProfile(profile *entities.DoctorProfile) (*int64, error) {
+	query := `INSERT INTO doctor_profiles (user_id,  specialization, str_number, bio_desc) VALUES ($1, $2, $3, $4) RETURNING id`
+
+	var id int64
+	if err := r.DB.QueryRow(query, profile.UserID, profile.Specialization, profile.STRNo, profile.BioDesc).Scan(&id); err != nil {
+		return nil, err
+	}
+
+	return &id, nil
+}
+
 func (r *DbDoctorRepository) FindAll(filter *request.FilterAppointmentSchedule) ([]*entities.DoctorProfile, error) {
 	var query string
 
@@ -34,7 +45,7 @@ func (r *DbDoctorRepository) FindAll(filter *request.FilterAppointmentSchedule) 
 				placeholders = append(placeholders, fmt.Sprintf("$%d", paramLen))
 				params = append(params, day)
 			}
-			conditions = append(conditions, fmt.Sprintf("sc.day IN (%s)", strings.Join(placeholders, ",")))
+			conditions = append(conditions, fmt.Sprintf("sc.day_of_week IN (%s)", strings.Join(placeholders, ",")))
 		}
 
 		if filter.StartHour != "" {

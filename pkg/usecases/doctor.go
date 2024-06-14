@@ -20,6 +20,26 @@ func NewDoctorUsecase(doctorRepo repo_intf.DoctorRepository) usecase_intf.Doctor
 	}
 }
 
+func (u *DoctorUsecase) CreateProfile(user entities.User, p *request.CreateDoctorProfile) error {
+	if user.RoleName != "doctor" {
+		return errors.New("user is not a doctor")
+	}
+
+	profile := &entities.DoctorProfile{
+		UserID:         user.ID,
+		Specialization: p.Specialization,
+		STRNo:          p.STRNumber,
+		BioDesc:        p.BioDesc,
+	}
+
+	_, err := u.doctorRepo.CreateProfile(profile)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (u *DoctorUsecase) FindAll(filter *request.FilterAppointmentSchedule) ([]*entities.DoctorProfile, error) {
 	daysOfWeek, err := helpers.GetDaysOfWeek(filter.StartDate, filter.EndDate)
 	if err != nil {

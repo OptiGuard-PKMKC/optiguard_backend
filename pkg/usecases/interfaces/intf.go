@@ -33,6 +33,7 @@ type UserUsecase interface {
 }
 
 type DoctorUsecase interface {
+	CreateProfile(user entities.User, p *request.CreateDoctorProfile) error
 	FindAll(filter *request.FilterAppointmentSchedule) ([]*entities.DoctorProfile, error)
 	GetProfile(doctorID int64) (*entities.DoctorProfile, error)
 	CreateSchedule(userID int64, params []*request.CreateDoctorSchedule) error

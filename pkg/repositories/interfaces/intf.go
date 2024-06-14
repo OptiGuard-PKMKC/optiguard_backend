@@ -37,6 +37,7 @@ type UserRepository interface {
 }
 
 type DoctorRepository interface {
+	CreateProfile(profile *entities.DoctorProfile) (*int64, error)
 	FindAll(filter *request.FilterAppointmentSchedule) ([]*entities.DoctorProfile, error)
 	GetProfileByID(profileID int64) (*entities.DoctorProfile, error)
 	GetPractice(profileID int64) ([]*entities.DoctorPractice, error)
