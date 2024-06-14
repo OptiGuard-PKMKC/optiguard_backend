@@ -18,12 +18,44 @@ func NewDbDoctorRepository(db *sql.DB) repo_intf.DoctorRepository {
 	return &DbDoctorRepository{DB: db}
 }
 
-func (r *DbDoctorRepository) CreateProfile(profile *entities.DoctorProfile) (*int64, error) {
+func (r *DbDoctorRepository) CreateProfile(profile *entities.DoctorProfile, practices []*entities.DoctorPractice, educations []*entities.DoctorEducation) (*int64, error) {
+	tx, err := r.DB.Begin()
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+			return
+		}
+		err = tx.Commit()
+	}()
+
+	// Insert into doctor_profiles
 	query := `INSERT INTO doctor_profiles (user_id,  specialization, str_number, bio_desc) VALUES ($1, $2, $3, $4) RETURNING id`
 
 	var id int64
-	if err := r.DB.QueryRow(query, profile.UserID, profile.Specialization, profile.STRNo, profile.BioDesc).Scan(&id); err != nil {
+	err = tx.QueryRow(query, profile.UserID, profile.Specialization, profile.STRNo, profile.BioDesc).Scan(&id)
+	if err != nil {
 		return nil, err
+	}
+
+	// Insert into doctor_practices
+	practiceQuery := `INSERT INTO doctor_practices (doctor_id, city, province, office_name, address, start_date, end_date) VALUES ($1, $2, $3, $4, $5, $6, $7)`
+	for _, pr := range practices {
+		_, err := tx.Exec(practiceQuery, id, pr.City, pr.Province, pr.OfficeName, pr.Address, pr.StartDate.Time, pr.EndDate.Time)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// Insert into doctor_educations
+	educationQuery := `INSERT INTO doctor_educations (doctor_id, degree, school_name, start_date, end_date) VALUES ($1, $2, $3, $4, $5)`
+	for _, ed := range educations {
+		_, err := tx.Exec(educationQuery, id, ed.Degree, ed.SchoolName, ed.StartDate.Time, ed.EndDate.Time)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &id, nil
@@ -84,6 +116,20 @@ func (r *DbDoctorRepository) FindAll(filter *request.FilterAppointmentSchedule) 
 	}
 
 	return profiles, nil
+}
+
+func (r *DbDoctorRepository) FindProfileByUserID(userID int64) (*int64, error) {
+	query := `SELECT id FROM doctor_profiles WHERE user_id = $1`
+
+	var id int64
+	if err := r.DB.QueryRow(query, userID).Scan(&id); err != nil {
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return &id, nil
 }
 
 func (r *DbDoctorRepository) GetProfileByID(profileID int64) (*entities.DoctorProfile, error) {

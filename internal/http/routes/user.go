@@ -19,7 +19,7 @@ func UserRoutes(router *mux.Router, controller route_intf.Controllers, secretKey
 		@desc Create doctor profile
 		@route /user/doctor
 		@method POST
-		@body { "specialization", "str_number", "bio_desc" }
+		@body { "specialization", "str_number", "bio_desc", []"practices"{ "city", "province", "office_name", "address", "start_date", "end_date" }, "[]educations{ "degree", "school_name", "start_date", "end_date" }" }
 	*/
 	router.Handle(
 		"/user/doctor",

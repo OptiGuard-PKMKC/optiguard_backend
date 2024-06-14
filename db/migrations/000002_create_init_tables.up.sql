@@ -78,7 +78,7 @@ CREATE TABLE IF NOT EXISTS doctor_schedules (
     end_hour TIME NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_doctor_schedules_doctor_id FOREIGN KEY (doctor_id) REFERENCES users(id)
+    CONSTRAINT fk_doctor_schedules_doctor_id FOREIGN KEY (doctor_id) REFERENCES doctor_profiles(id)
 );
 
 CREATE TABLE IF NOT EXISTS doctor_practices (
@@ -92,7 +92,7 @@ CREATE TABLE IF NOT EXISTS doctor_practices (
     end_date DATE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_doctor_practices_doctor_id FOREIGN KEY (doctor_id) REFERENCES users(id)
+    CONSTRAINT fk_doctor_practices_doctor_id FOREIGN KEY (doctor_id) REFERENCES doctor_profiles(id)
 );
 
 CREATE TABLE IF NOT EXISTS doctor_educations (
@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS doctor_educations (
     end_date DATE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_doctor_educations_doctor_id FOREIGN KEY (doctor_id) REFERENCES users(id)
+    CONSTRAINT fk_doctor_educations_doctor_id FOREIGN KEY (doctor_id) REFERENCES doctor_profiles(id)
 );
 
 CREATE TABLE IF NOT EXISTS appointments (

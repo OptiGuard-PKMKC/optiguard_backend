@@ -1,6 +1,10 @@
 package entities
 
-import "time"
+import (
+	"time"
+
+	"github.com/OptiGuard-PKMKC/optiguard_backend/pkg/helpers/customtypes"
+)
 
 type DoctorProfile struct {
 	ID             int64              `json:"id"`
@@ -16,22 +20,23 @@ type DoctorProfile struct {
 }
 
 type DoctorPractice struct {
-	ID         int64     `json:"id"`
-	DoctorID   int64     `json:"doctor_id"`
-	City       string    `json:"city"`
-	Province   string    `json:"province"`
-	OfficeName string    `json:"office_name"`
-	StartDate  time.Time `json:"start_date"`
-	EndDate    time.Time `json:"end_date"`
+	ID         int64            `json:"id"`
+	DoctorID   int64            `json:"doctor_id"`
+	City       string           `json:"city"`
+	Province   string           `json:"province"`
+	OfficeName string           `json:"office_name"`
+	Address    string           `json:"address"`
+	StartDate  customtypes.Date `json:"start_date"`
+	EndDate    customtypes.Date `json:"end_date"`
 }
 
 type DoctorEducation struct {
-	ID         int64     `json:"id"`
-	DoctorID   int64     `json:"doctor_id"`
-	University string    `json:"university"`
-	Major      string    `json:"major"`
-	StartDate  time.Time `json:"start_date"`
-	EndDate    time.Time `json:"end_date"`
+	ID         int64            `json:"id"`
+	DoctorID   int64            `json:"doctor_id"`
+	Degree     string           `json:"degree"`
+	SchoolName string           `json:"school_name"`
+	StartDate  customtypes.Date `json:"start_date"`
+	EndDate    customtypes.Date `json:"end_date"`
 }
 
 type DoctorSchedule struct {

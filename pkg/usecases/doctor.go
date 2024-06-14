@@ -25,6 +25,14 @@ func (u *DoctorUsecase) CreateProfile(user entities.User, p *request.CreateDocto
 		return errors.New("user is not a doctor")
 	}
 
+	isProfileExist, err := u.doctorRepo.FindProfileByUserID(user.ID)
+	if err != nil {
+		return err
+	}
+	if isProfileExist != nil {
+		return errors.New("doctor profile already exist")
+	}
+
 	profile := &entities.DoctorProfile{
 		UserID:         user.ID,
 		Specialization: p.Specialization,
@@ -32,7 +40,30 @@ func (u *DoctorUsecase) CreateProfile(user entities.User, p *request.CreateDocto
 		BioDesc:        p.BioDesc,
 	}
 
-	_, err := u.doctorRepo.CreateProfile(profile)
+	practices := []*entities.DoctorPractice{}
+	for _, pr := range p.Practices {
+		practice := &entities.DoctorPractice{
+			City:       pr.City,
+			Province:   pr.Province,
+			OfficeName: pr.OfficeName,
+			StartDate:  pr.StartDate,
+			EndDate:    pr.EndDate,
+		}
+		practices = append(practices, practice)
+	}
+
+	educations := []*entities.DoctorEducation{}
+	for _, ed := range p.Educations {
+		education := &entities.DoctorEducation{
+			Degree:     ed.Degree,
+			SchoolName: ed.SchoolName,
+			StartDate:  ed.StartDate,
+			EndDate:    ed.EndDate,
+		}
+		educations = append(educations, education)
+	}
+
+	_, err = u.doctorRepo.CreateProfile(profile, practices, educations)
 	if err != nil {
 		return err
 	}
