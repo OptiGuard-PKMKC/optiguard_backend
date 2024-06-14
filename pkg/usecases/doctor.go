@@ -35,6 +35,15 @@ func (u *DoctorUsecase) FindAll(filter *request.FilterAppointmentSchedule) ([]*e
 	return doctors, nil
 }
 
+func (u *DoctorUsecase) GetProfile(doctorID int64) (*entities.DoctorProfile, error) {
+	doctor, err := u.doctorRepo.GetProfileByID(doctorID)
+	if err != nil {
+		return nil, err
+	}
+
+	return doctor, nil
+}
+
 func (u *DoctorUsecase) CreateSchedule(userID int64, params []*request.CreateDoctorSchedule) error {
 	var schedules []*entities.DoctorSchedule
 

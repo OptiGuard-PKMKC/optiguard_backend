@@ -75,7 +75,7 @@ func (r *DbDoctorRepository) FindAll(filter *request.FilterAppointmentSchedule) 
 	return profiles, nil
 }
 
-func (r *DbDoctorRepository) GetProfile(profileID int64) (*entities.DoctorProfile, error) {
+func (r *DbDoctorRepository) GetProfileByID(profileID int64) (*entities.DoctorProfile, error) {
 	query := `SELECT * FROM doctor_profiles WHERE id = $1`
 
 	profile := &entities.DoctorProfile{}

@@ -50,6 +50,29 @@ func (c *DoctorController) ViewAll(w http.ResponseWriter, r *http.Request) {
 	}, http.StatusOK)
 }
 
+func (c *DoctorController) Profile(w http.ResponseWriter, r *http.Request) {
+	doctorID, err := helpers.StringToInt64(helpers.UrlVars(r, "id"))
+	if err != nil {
+		helpers.FailedGetUrlVars(w, err, nil)
+		return
+	}
+
+	doctor, err := c.doctorUsecase.GetProfile(*doctorID)
+	if err != nil {
+		helpers.SendResponse(w, response.Response{
+			Status: "error",
+			Error:  err.Error(),
+		}, http.StatusInternalServerError)
+		return
+	}
+
+	helpers.SendResponse(w, response.Response{
+		Status:  "success",
+		Message: "Fetch doctor profile success",
+		Data:    doctor,
+	}, http.StatusOK)
+}
+
 func (c *DoctorController) CreateSchedule(w http.ResponseWriter, r *http.Request) {
 	req := []*request.CreateDoctorSchedule{}
 	if err := helpers.JsonBodyDecoder(r.Body, &req); err != nil {

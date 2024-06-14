@@ -1,13 +1,13 @@
 CREATE TABLE IF NOT EXISTS user_roles (
-    id int PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     role_name VARCHAR(20) NOT NULL UNIQUE
 );
 
-INSERT INTO user_roles (id, role_name) VALUES 
-(1, 'guest'),
-(2, 'admin'),
-(3, 'patient'),
-(4, 'doctor');
+INSERT INTO user_roles (role_name) VALUES
+('guest'),
+('admin'),
+('patient'),
+('doctor');
 
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS users (
     address TEXT DEFAULT '',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_role_id FOREIGN KEY (role_id) REFERENCES user_roles(id)
+    CONSTRAINT fk_users_role_id FOREIGN KEY (role_id) REFERENCES user_roles(id)
 );
 
 CREATE TABLE IF NOT EXISTS funduses (
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS funduses (
     status VARCHAR(255),
     condition VARCHAR(255),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_patient_id FOREIGN KEY (patient_id) REFERENCES users(id)
+    CONSTRAINT fk_funduses_patient_id FOREIGN KEY (patient_id) REFERENCES users(id)
 );
 
 CREATE TABLE IF NOT EXISTS fundus_details (
@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS fundus_details (
     disease VARCHAR(255) NOT NULL,
     confidence_score FLOAT NOT NULL,
     description TEXT DEFAULT '',
-    CONSTRAINT fk_fundus_id FOREIGN KEY (fundus_id) REFERENCES funduses(id)
+    CONSTRAINT fk_fundus_details_fundus_id FOREIGN KEY (fundus_id) REFERENCES funduses(id)
 );
 
 CREATE TABLE IF NOT EXISTS fundus_feedbacks (
@@ -53,11 +53,11 @@ CREATE TABLE IF NOT EXISTS fundus_feedbacks (
     notes TEXT DEFAULT '',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_fundus_id FOREIGN KEY (fundus_id) REFERENCES funduses(id),
-    CONSTRAINT fk_doctor_id FOREIGN KEY (doctor_id) REFERENCES users(id)
+    CONSTRAINT fk_fundus_feedbacks_fundus_id FOREIGN KEY (fundus_id) REFERENCES funduses(id),
+    CONSTRAINT fk_fundus_feedbacks_doctor_id FOREIGN KEY (doctor_id) REFERENCES users(id)
 );
 
-CREATE TABLE IF NOT EXISTS doctor_profiles {
+CREATE TABLE IF NOT EXISTS doctor_profiles (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     specialization VARCHAR(255) NOT NULL,
@@ -67,10 +67,10 @@ CREATE TABLE IF NOT EXISTS doctor_profiles {
     rating INTEGER DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id)
-};
+    CONSTRAINT fk_doctor_profiles_user_id FOREIGN KEY (user_id) REFERENCES users(id)
+);
 
-CREATE TABLE IF NOT EXISTS doctor_schedules {
+CREATE TABLE IF NOT EXISTS doctor_schedules (
     id SERIAL PRIMARY KEY,
     doctor_id INTEGER NOT NULL,
     day_of_week INTEGER NOT NULL,
@@ -78,10 +78,10 @@ CREATE TABLE IF NOT EXISTS doctor_schedules {
     end_hour TIME NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_doctor_id FOREIGN KEY (doctor_id) REFERENCES users(id)
-};
+    CONSTRAINT fk_doctor_schedules_doctor_id FOREIGN KEY (doctor_id) REFERENCES users(id)
+);
 
-CREATE TABLE IF NOT EXISTS doctor_practices {
+CREATE TABLE IF NOT EXISTS doctor_practices (
     id SERIAL PRIMARY KEY,
     doctor_id INTEGER NOT NULL,
     city VARCHAR(255) NOT NULL,
@@ -92,9 +92,10 @@ CREATE TABLE IF NOT EXISTS doctor_practices {
     end_date DATE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-};
+    CONSTRAINT fk_doctor_practices_doctor_id FOREIGN KEY (doctor_id) REFERENCES users(id)
+);
 
-CREATE TABLE IF NOT EXISTS doctor_educations {
+CREATE TABLE IF NOT EXISTS doctor_educations (
     id SERIAL PRIMARY KEY,
     doctor_id INTEGER NOT NULL,
     degree VARCHAR(255) NOT NULL,
@@ -103,10 +104,10 @@ CREATE TABLE IF NOT EXISTS doctor_educations {
     end_date DATE NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_doctor_id FOREIGN KEY (doctor_id) REFERENCES users(id)
-};
+    CONSTRAINT fk_doctor_educations_doctor_id FOREIGN KEY (doctor_id) REFERENCES users(id)
+);
 
-CREATE TABLE IF NOT EXISTS appointments {
+CREATE TABLE IF NOT EXISTS appointments (
     id SERIAL PRIMARY KEY,
     patient_id INTEGER NOT NULL,
     doctor_id INTEGER NOT NULL,
@@ -116,11 +117,11 @@ CREATE TABLE IF NOT EXISTS appointments {
     status VARCHAR(255) DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_patient_id FOREIGN KEY (patient_id) REFERENCES users(id),
-    CONSTRAINT fk_doctor_id FOREIGN KEY (doctor_id) REFERENCES users(id)
-};
+    CONSTRAINT fk_appointments_patient_id FOREIGN KEY (patient_id) REFERENCES users(id),
+    CONSTRAINT fk_appointments_doctor_id FOREIGN KEY (doctor_id) REFERENCES users(id)
+);
 
-CREATE TABLE IF NOT EXISTS health_facilities {
+CREATE TABLE IF NOT EXISTS health_facilities (
     id SERIAL PRIMARY KEY,
     facility_name VARCHAR(255) NOT NULL,
     city VARCHAR(255) NOT NULL,
@@ -128,20 +129,20 @@ CREATE TABLE IF NOT EXISTS health_facilities {
     address TEXT NOT NULL,
     adaptor_quantity INTEGER NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-};
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-CREATE TABLE IF NOT EXISTS adaptors {
+CREATE TABLE IF NOT EXISTS adaptors (
     id SERIAL PRIMARY KEY,
     facility_id INTEGER NOT NULL,
     device_code VARCHAR(255) NOT NULL,
     used BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_facility_id FOREIGN KEY (facility_id) REFERENCES health_facilities(id)
-};
+    CONSTRAINT fk_adaptors_facility_id FOREIGN KEY (facility_id) REFERENCES health_facilities(id)
+);
 
-CREATE TABLE IF NOT EXISTS user_adaptors {
+CREATE TABLE IF NOT EXISTS user_adaptors (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     adaptor_id INTEGER NOT NULL,
@@ -150,30 +151,32 @@ CREATE TABLE IF NOT EXISTS user_adaptors {
     end_hour TIME NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-};
+    CONSTRAINT fk_user_adaptors_user_id FOREIGN KEY (user_id) REFERENCES users(id),
+    CONSTRAINT fk_user_adaptors_adaptor_id FOREIGN KEY (adaptor_id) REFERENCES adaptors(id)
+);
 
-CREATE TABLE chat_rooms (
+CREATE TABLE IF NOT EXISTS chat_rooms (
     id SERIAL PRIMARY KEY,
     doctor_id INTEGER NOT NULL,
     patient_id INTEGER NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_doctor_id FOREIGN KEY (doctor_id) REFERENCES users(id),
-    CONSTRAINT fk_patient_id FOREIGN KEY (patient_id) REFERENCES users(id)
+    CONSTRAINT fk_chat_rooms_doctor_id FOREIGN KEY (doctor_id) REFERENCES users(id),
+    CONSTRAINT fk_chat_rooms_patient_id FOREIGN KEY (patient_id) REFERENCES users(id)
 );
 
-CREATE TABLE chat_messages (
+CREATE TABLE IF NOT EXISTS chat_messages (
     id SERIAL PRIMARY KEY,
     chat_room_id INTEGER NOT NULL,
     sender_id INTEGER NOT NULL,
     message TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_chat_room_id FOREIGN KEY (chat_room_id) REFERENCES chat_rooms(id),
-    CONSTRAINT fk_sender_id FOREIGN KEY (sender_id) REFERENCES users(id)
+    CONSTRAINT fk_chat_messages_chat_room_id FOREIGN KEY (chat_room_id) REFERENCES chat_rooms(id),
+    CONSTRAINT fk_chat_messages_sender_id FOREIGN KEY (sender_id) REFERENCES users(id)
 );
 
-CREATE TABLE IF NOT EXISTS notifications {
+CREATE TABLE IF NOT EXISTS notifications (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     title VARCHAR(255) NOT NULL,
@@ -181,5 +184,5 @@ CREATE TABLE IF NOT EXISTS notifications {
     is_read BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_user_id FOREIGN KEY (user_id) REFERENCES users(id)
-};
+    CONSTRAINT fk_notifications_user_id FOREIGN KEY (user_id) REFERENCES users(id)
+);
