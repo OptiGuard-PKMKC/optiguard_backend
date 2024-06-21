@@ -7,6 +7,13 @@ type PatientID struct {
 }
 
 type (
+	CurrentUser struct {
+		ID   int64  `json:"id"`
+		Role string `json:"role"`
+	}
+)
+
+type (
 	CreateDoctorProfile struct {
 		Specialization string                  `json:"specialization" validate:"required"`
 		STRNumber      string                  `json:"str_number" validate:"required"`

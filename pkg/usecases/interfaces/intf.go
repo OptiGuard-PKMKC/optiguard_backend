@@ -12,6 +12,12 @@ type AuthUsecase interface {
 	Login(p *request.Login) (*response.Login, error)
 }
 
+type HealthFacilityUsecase interface {
+	CreateSchedule(user request.CurrentUser, p *request.CreateAdaptorSchedule) error
+	FindAll() ([]*entities.HealthFacility, error)
+	FindByID(id int64) (*entities.HealthFacility, error)
+}
+
 type AppointmentUsecase interface {
 	Create(p *request.CreateAppointment) error
 	FindAll(p *request.ViewAppointment) ([]*entities.Appointment, error)

@@ -40,8 +40,11 @@ func (u *DoctorUsecase) CreateProfile(user entities.User, p *request.CreateDocto
 		BioDesc:        p.BioDesc,
 	}
 
+	var workYears int
 	practices := []*entities.DoctorPractice{}
 	for _, pr := range p.Practices {
+		workYears += helpers.GetWorkYears(pr.StartDate, pr.EndDate)
+
 		practice := &entities.DoctorPractice{
 			City:       pr.City,
 			Province:   pr.Province,
@@ -51,6 +54,8 @@ func (u *DoctorUsecase) CreateProfile(user entities.User, p *request.CreateDocto
 		}
 		practices = append(practices, practice)
 	}
+
+	profile.WorkYears = workYears
 
 	educations := []*entities.DoctorEducation{}
 	for _, ed := range p.Educations {

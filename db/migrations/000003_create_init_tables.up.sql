@@ -132,6 +132,17 @@ CREATE TABLE IF NOT EXISTS health_facilities (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE facility_schedules (
+	id SERIAL PRIMARY KEY,
+	facility_id INTEGER NOT NULL,
+	day_of_week INTEGER NOT NULL,
+	start_hour TIME NOT NULL,
+	end_hour TIME NOT NULL,
+	created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	CONSTRAINT fk_facility_schedules_facility_id FOREIGN KEY (facility_id) REFERENCES health_facilities(id)
+);
+
 CREATE TABLE IF NOT EXISTS adaptors (
     id SERIAL PRIMARY KEY,
     facility_id INTEGER NOT NULL,
@@ -145,14 +156,16 @@ CREATE TABLE IF NOT EXISTS adaptors (
 CREATE TABLE IF NOT EXISTS user_adaptors (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
+    facility_id INTEGER NOT NULL,
     adaptor_id INTEGER NOT NULL,
+    schedule_id INTEGER NOT NULL,
     date DATE NOT NULL,
-    start_hour TIME NOT NULL,
-    end_hour TIME NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_user_adaptors_user_id FOREIGN KEY (user_id) REFERENCES users(id),
-    CONSTRAINT fk_user_adaptors_adaptor_id FOREIGN KEY (adaptor_id) REFERENCES adaptors(id)
+    CONSTRAINT fk_user_adaptors_adaptor_id FOREIGN KEY (adaptor_id) REFERENCES adaptors(id),
+    CONSTRAINT fk_user_adaptors_schedule_id FOREIGN KEY (schedule_id) REFERENCES facility_schedules(id),
+    CONSTRAINT fk_user_adaptors_facility_id FOREIGN KEY (facility_id) REFERENCES health_facilities(id)
 );
 
 CREATE TABLE IF NOT EXISTS chat_rooms (

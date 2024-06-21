@@ -5,6 +5,13 @@ import (
 	"github.com/OptiGuard-PKMKC/optiguard_backend/pkg/entities"
 )
 
+type HealthFacilityRepository interface {
+	CreateSchedule(userID int64, p *request.CreateAdaptorSchedule) error
+	FindAll() ([]*entities.HealthFacility, error)
+	FindByID(id int64) (*entities.HealthFacility, error)
+	FindAdaptorsByFacilityID(facilityID int64) ([]entities.Adaptor, error)
+}
+
 type AppointmentRepository interface {
 	Create(apt *entities.Appointment) error
 	FindAll(doctorID *int64, patientID *int64) ([]*entities.Appointment, error)

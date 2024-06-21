@@ -63,10 +63,4 @@ func UserRoutes(router *mux.Router, controller route_intf.Controllers, secretKey
 		@method PUT
 		@body { "id" }
 	*/
-
-	/*
-		@route /user/doctor/profile
-		@method POST
-		@body { "" }
-	*/
 }

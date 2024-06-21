@@ -8,7 +8,7 @@ import (
 	"net/http"
 
 	middleware_intf "github.com/OptiGuard-PKMKC/optiguard_backend/internal/http/middleware/interfaces"
-	"github.com/OptiGuard-PKMKC/optiguard_backend/internal/interfaces/response"
+	"github.com/OptiGuard-PKMKC/optiguard_backend/internal/interfaces/request"
 	"github.com/gorilla/mux"
 )
 
@@ -44,7 +44,7 @@ func SendResponse(w http.ResponseWriter, response interface{}, status int) {
 	w.Write(res)
 }
 
-func GetCurrentUser(r *http.Request) (*response.CurrentUser, error) {
+func GetCurrentUser(r *http.Request) (*request.CurrentUser, error) {
 	// Extract values from context
 	userID, ok := r.Context().Value(middleware_intf.ContextKey.UserID).(int64)
 	if !ok {
@@ -56,7 +56,7 @@ func GetCurrentUser(r *http.Request) (*response.CurrentUser, error) {
 		return nil, errors.New("user role is required or invalid")
 	}
 
-	return &response.CurrentUser{
+	return &request.CurrentUser{
 		ID:   userID,
 		Role: userRole,
 	}, nil

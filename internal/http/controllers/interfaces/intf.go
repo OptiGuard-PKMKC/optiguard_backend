@@ -10,6 +10,12 @@ type AuthController interface {
 	Login(w http.ResponseWriter, r *http.Request)
 }
 
+type HealthFacilityController interface {
+	CreateAdaptorSchedule(w http.ResponseWriter, r *http.Request)
+	ViewAllFacility(w http.ResponseWriter, r *http.Request)
+	ViewAllLensAdaptorByFacility(w http.ResponseWriter, r *http.Request)
+}
+
 type AppointmentController interface {
 	Create(w http.ResponseWriter, r *http.Request)
 	ViewAll(w http.ResponseWriter, r *http.Request)

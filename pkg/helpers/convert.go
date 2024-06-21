@@ -30,3 +30,16 @@ func GetDaysOfWeek(start, end customtypes.Date) ([]int, error) {
 
 	return daysOfWeek, nil
 }
+
+func GetWorkYears(start customtypes.Date, end customtypes.Date) int {
+	var year, month int
+	year = end.Time.Year() - start.Time.Year()
+	if year <= 1 {
+		month = (int(end.Time.Month()) + 12) - int(start.Time.Month())
+		if month <= 12 {
+			year = 0
+		}
+	}
+
+	return year
+}
