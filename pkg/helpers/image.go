@@ -3,8 +3,9 @@ package helpers
 import (
 	"encoding/base64"
 	"fmt"
-	"os"
+	"os/exec"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -19,13 +20,15 @@ func StoreImage(imageBlob string) (string, error) {
 	fileName := fmt.Sprintf("image_%d.jpg", time.Now().UnixNano())
 	filePath := filepath.Join("storage/images/fundus", fileName)
 
-	// Ensure the directory exists
-	if err := os.MkdirAll("storage/images/fundus", os.ModePerm); err != nil {
+	// Ensure the directory exists with sudo
+	if err := exec.Command("sudo", "mkdir", "-p", "storage/images/fundus").Run(); err != nil {
 		return "", fmt.Errorf("failed to create directory: %v", err)
 	}
 
-	// Write the image data to the file
-	if err := os.WriteFile(filePath, imageData, 0644); err != nil {
+	// Write the image data to the file with sudo
+	cmd := exec.Command("sudo", "tee", filePath)
+	cmd.Stdin = strings.NewReader(string(imageData))
+	if err := cmd.Run(); err != nil {
 		return "", fmt.Errorf("failed to write image file: %v", err)
 	}
 
