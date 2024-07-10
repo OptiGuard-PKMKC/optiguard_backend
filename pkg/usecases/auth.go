@@ -89,7 +89,7 @@ func (u *AuthUsecase) Register(p *request.Register) (*response.Register, error) 
 
 	// Generate JWT
 	paramsJWT := helpers.ParamsGenerateJWT{
-		ExpiredInMinute: 60,
+		ExpiredInMinute: 60 * 24 * 30,
 		SecretKey:       u.secretKey,
 		UserID:          user.ID,
 		UserRole:        role.RoleName,
@@ -129,7 +129,7 @@ func (u *AuthUsecase) Login(p *request.Login) (*response.Login, error) {
 
 	// Generate JWT
 	paramsJWT := helpers.ParamsGenerateJWT{
-		ExpiredInMinute: 60,
+		ExpiredInMinute: 60 * 24 * 30,
 		SecretKey:       u.secretKey,
 		UserID:          user.ID,
 		UserRole:        user.RoleName,

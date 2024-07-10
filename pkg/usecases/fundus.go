@@ -1,8 +1,13 @@
 package usecases
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
 	"log"
+	"net/http"
 
 	"github.com/OptiGuard-PKMKC/optiguard_backend/internal/interfaces/request"
 	"github.com/OptiGuard-PKMKC/optiguard_backend/pkg/entities"
@@ -10,6 +15,17 @@ import (
 	repo_intf "github.com/OptiGuard-PKMKC/optiguard_backend/pkg/repositories/interfaces"
 	usecase_intf "github.com/OptiGuard-PKMKC/optiguard_backend/pkg/usecases/interfaces"
 )
+
+const apiKey = "oEfC3PglPKoCg1jDa833awsnTLoCxWSjbumTypmSEbNgWAincCp00DkcFEw45JznC6Cou73GrU07VieU01ktlsckPyqlWoSU75Bf"
+const apiEndpoint = "https://normal-utterly-raptor.ngrok-free.app/predict"
+
+type RequestBody struct {
+	FundusImage string `json:"fundus_image"`
+}
+
+type ResponseBody struct {
+	PredictedClass string `json:"predicted_class"`
+}
 
 type FundusUsecase struct {
 	mlApiKey   string
@@ -25,63 +41,92 @@ func NewFundusUsecase(mlApiKey string, fundusRepo repo_intf.FundusRepository, us
 	}
 }
 
-func (u *FundusUsecase) DetectImage(p *request.DetectFundusImage) (int64, error) {
+func detectFundusImageAPI(imageBlob string) (string, error) {
+	// Create the request body
+	requestBody, err := json.Marshal(RequestBody{FundusImage: imageBlob})
+	if err != nil {
+		return "", fmt.Errorf("failed to marshal request body: %v", err)
+	}
+
+	// Create the HTTP request
+	req, err := http.NewRequest("POST", apiEndpoint, bytes.NewBuffer(requestBody))
+	if err != nil {
+		return "", fmt.Errorf("failed to create request: %v", err)
+	}
+
+	// Set headers
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("x-api-key", apiKey)
+
+	// Send the HTTP request
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("failed to send request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	// Check if the status code is not 200
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return "", fmt.Errorf("non-200 status code: %d, response: %s", resp.StatusCode, string(body))
+	}
+
+	// Read the response body
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("failed to read response body: %v", err)
+	}
+
+	// Parse the response body
+	var responseBody ResponseBody
+	err = json.Unmarshal(body, &responseBody)
+	if err != nil {
+		return "", fmt.Errorf("failed to unmarshal response body: %v", err)
+	}
+
+	log.Printf("Predicted class: %s", responseBody.PredictedClass)
+
+	return responseBody.PredictedClass, nil
+}
+
+func (u *FundusUsecase) DetectImage(p *request.DetectFundusImage) (*entities.Fundus, error) {
 	validPatient, err := u.userRepo.FindByIDAndRole(p.PatientID, "patient")
 	if err != nil {
 		log.Printf("Error finding patient: %v", err)
-		return 0, err
+		return nil, err
 	}
 
 	if validPatient == nil {
-		return 0, errors.New("user id is not a patient")
+		return nil, errors.New("user id is not a patient")
 	}
 
 	// Call machine learning API to detect fundus image
-	// API auth using API key
-	// API endpoint: /detect
-	// API method: POST
-	// API body: { "image_blob": "xxx" }
-	// API response: []{ "disease": "xxx", "confidence_score": 0.0, "description": "xxx" }
-	fundusDetails := []*entities.FundusDetail{
-		{
-			Disease:         "DR",
-			ConfidenceScore: 33.2,
-			Description:     "",
-		}, {
-			Disease:         "CT",
-			ConfidenceScore: 20.1,
-			Description:     "",
-		}, {
-			Disease:         "GL",
-			ConfidenceScore: 10.5,
-			Description:     "",
-		},
+	predictedClass, err := detectFundusImageAPI(p.FundusImage)
+	if err != nil {
+		return nil, err
 	}
-
-	// If error, return error
 
 	// Store image in VM
-	imageURL, err := helpers.StoreImage(p.ImageBlob)
+	imagePath, err := helpers.StoreImage(p.FundusImage)
 	if err != nil {
-		return 0, errors.New("failed to store image")
+		return nil, errors.New("failed to store image")
 	}
-
-	condition := helpers.GetFundusCondition(fundusDetails)
 
 	// Create fundus record in database
 	fundus := &entities.Fundus{
 		PatientID: p.PatientID,
-		ImageURL:  imageURL,
+		ImagePath: imagePath,
 		Verified:  false,
-		Condition: condition,
+		Condition: predictedClass,
 	}
 
-	fundusID, err := u.fundusRepo.Create(fundus, fundusDetails)
+	newFundus, err := u.fundusRepo.Create(fundus)
 	if err != nil {
-		return 0, errors.New("failed to create fundus record")
+		return nil, err
 	}
 
-	return fundusID, nil
+	return newFundus, nil
 }
 
 func (u *FundusUsecase) ViewFundus(fundusID int64) (*entities.Fundus, error) {

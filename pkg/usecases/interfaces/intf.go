@@ -25,7 +25,7 @@ type AppointmentUsecase interface {
 }
 
 type FundusUsecase interface {
-	DetectImage(p *request.DetectFundusImage) (int64, error)
+	DetectImage(p *request.DetectFundusImage) (*entities.Fundus, error)
 	ViewFundus(fundusID int64) (*entities.Fundus, error)
 	FundusHistory(userID int64) ([]*entities.Fundus, error)
 	RequestVerifyFundusByPatient() error

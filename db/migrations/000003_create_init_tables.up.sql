@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS funduses (
     id SERIAL PRIMARY KEY,
     patient_id INTEGER NOT NULL,
-    image_url TEXT NOT NULL,
+    image_path TEXT NOT NULL,
     verified BOOLEAN NOT NULL DEFAULT FALSE,
     status VARCHAR(255),
     condition VARCHAR(255),

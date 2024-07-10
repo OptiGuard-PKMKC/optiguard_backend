@@ -5,13 +5,13 @@ import "time"
 type Fundus struct {
 	ID        int64             `json:"id"`
 	PatientID int64             `json:"patient_id"`
-	ImageURL  string            `json:"image_url"`
+	ImagePath string            `json:"image_path"`
 	Verified  bool              `json:"verified"`
 	Status    string            `json:"status"`
 	Condition string            `json:"condition"`
 	CreatedAt time.Time         `json:"created_at"`
 	UpdatedAt time.Time         `json:"updated_at"`
-	Detail    []*FundusDetail   `json:"details"`
+	Detail    []*FundusDetail   `json:"details,omitempty"`
 	Feedback  []*FundusFeedback `json:"feedbacks,omitempty"`
 }
 

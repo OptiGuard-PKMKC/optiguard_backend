@@ -20,7 +20,7 @@ type AppointmentRepository interface {
 }
 
 type FundusRepository interface {
-	Create(fundus *entities.Fundus, details []*entities.FundusDetail) (int64, error)
+	Create(fundus *entities.Fundus) (*entities.Fundus, error)
 	CreateFeedback(feedback []entities.FundusFeedback) error
 	FindAll() error
 	FindByID(id int64) (*entities.Fundus, error)

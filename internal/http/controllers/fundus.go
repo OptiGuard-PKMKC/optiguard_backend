@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"encoding/base64"
+	"io"
 	"net/http"
 
 	controller_intf "github.com/OptiGuard-PKMKC/optiguard_backend/internal/http/controllers/interfaces"
@@ -21,28 +23,57 @@ func NewFundusController(fundusUsecase usecase_intf.FundusUsecase) controller_in
 }
 
 func (c *FundusController) DetectImage(w http.ResponseWriter, r *http.Request) {
-	req := request.DetectFundusImage{}
-	if err := helpers.JsonBodyDecoder(r.Body, &req); err != nil {
+	// Request image file
+	err := r.ParseMultipartForm(10 << 20) // 10 MB
+	if err != nil {
 		helpers.SendResponse(w, response.Response{
 			Status:  "error",
-			Message: "Failed to parse request body",
+			Message: "Failed to parse form",
 			Error:   err.Error(),
 		}, http.StatusBadRequest)
 		return
 	}
 
-	// Validate the request body
-	err := validate.Struct(&req)
+	// Get image file
+	file, _, err := r.FormFile("fundus_image")
 	if err != nil {
 		helpers.SendResponse(w, response.Response{
 			Status:  "error",
-			Message: "Validation error",
-			Error:   helpers.GetValidationErrors(err),
+			Message: "Failed to get image file",
+			Error:   err.Error(),
 		}, http.StatusBadRequest)
 		return
 	}
+	defer file.Close()
 
-	fundusID, err := c.fundusUsecase.DetectImage(&req)
+	// Read file content
+	fileBytes, err := io.ReadAll(file)
+	if err != nil {
+		helpers.SendResponse(w, response.Response{
+			Status:  "error",
+			Message: "Failed to read image file",
+			Error:   err.Error(),
+		}, http.StatusInternalServerError)
+		return
+	}
+
+	// Get current user
+	user, err := helpers.GetCurrentUser(r)
+	if err != nil {
+		helpers.SendResponse(w, response.Response{
+			Status:  "error",
+			Message: "Failed to get current user",
+			Error:   err.Error(),
+		}, http.StatusInternalServerError)
+		return
+	}
+
+	req := request.DetectFundusImage{
+		PatientID:   user.ID,
+		FundusImage: base64.StdEncoding.EncodeToString(fileBytes),
+	}
+
+	newFundus, err := c.fundusUsecase.DetectImage(&req)
 	if err != nil {
 		helpers.SendResponse(w, response.Response{
 			Status: "error",
@@ -54,7 +85,7 @@ func (c *FundusController) DetectImage(w http.ResponseWriter, r *http.Request) {
 	res := response.Response{
 		Status:  "success",
 		Message: "Detect fundus success",
-		Data:    response.FundusID{ID: fundusID},
+		Data:    newFundus,
 	}
 
 	helpers.SendResponse(w, res, http.StatusCreated)
