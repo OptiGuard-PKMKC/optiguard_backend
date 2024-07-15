@@ -16,78 +16,79 @@ import (
 	usecase_intf "github.com/OptiGuard-PKMKC/optiguard_backend/pkg/usecases/interfaces"
 )
 
-const apiKey = "oEfC3PglPKoCg1jDa833awsnTLoCxWSjbumTypmSEbNgWAincCp00DkcFEw45JznC6Cou73GrU07VieU01ktlsckPyqlWoSU75Bf"
-const apiEndpoint = "https://normal-utterly-raptor.ngrok-free.app/predict"
-
 type RequestBody struct {
 	FundusImage string `json:"fundus_image"`
 }
 
 type ResponseBody struct {
-	PredictedClass string `json:"predicted_class"`
+	Error          string `json:"error,omitempty"`
+	PredictedClass string `json:"predicted_class,omitempty"`
+	CroppedImage   string `json:"cropped_image,omitempty"`
 }
 
 type FundusUsecase struct {
+	mlApi      string
 	mlApiKey   string
 	fundusRepo repo_intf.FundusRepository
 	userRepo   repo_intf.UserRepository
 }
 
-func NewFundusUsecase(mlApiKey string, fundusRepo repo_intf.FundusRepository, userRepo repo_intf.UserRepository) usecase_intf.FundusUsecase {
+func NewFundusUsecase(mlApi string, mlApiKey string, fundusRepo repo_intf.FundusRepository, userRepo repo_intf.UserRepository) usecase_intf.FundusUsecase {
 	return &FundusUsecase{
+		mlApi:      mlApi,
 		mlApiKey:   mlApiKey,
 		fundusRepo: fundusRepo,
 		userRepo:   userRepo,
 	}
 }
 
-func detectFundusImageAPI(imageBlob string) (string, error) {
+func detectFundusImageAPI(mlApi string, mlApiKey string, imageBlob string) (*ResponseBody, error) {
 	// Create the request body
 	requestBody, err := json.Marshal(RequestBody{FundusImage: imageBlob})
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal request body: %v", err)
+		return nil, fmt.Errorf("failed to marshal request body: %v", err)
 	}
 
 	// Create the HTTP request
-	req, err := http.NewRequest("POST", apiEndpoint, bytes.NewBuffer(requestBody))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s/predict", mlApi), bytes.NewBuffer(requestBody))
 	if err != nil {
-		return "", fmt.Errorf("failed to create request: %v", err)
+		return nil, fmt.Errorf("failed to create request: %v", err)
 	}
 
 	// Set headers
 	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("x-api-key", apiKey)
+	req.Header.Set("x-api-key", mlApiKey)
 
 	// Send the HTTP request
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("failed to send request: %v", err)
+		return nil, fmt.Errorf("failed to send request: %v", err)
 	}
 	defer resp.Body.Close()
 
 	// Check if the status code is not 200
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode > 299 {
 		body, _ := io.ReadAll(resp.Body)
-		return "", fmt.Errorf("non-200 status code: %d, response: %s", resp.StatusCode, string(body))
+		return nil, fmt.Errorf("non-200 status code: %d, response: %s", resp.StatusCode, string(body))
 	}
 
 	// Read the response body
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return "", fmt.Errorf("failed to read response body: %v", err)
+		return nil, fmt.Errorf("failed to read response body: %v", err)
 	}
 
 	// Parse the response body
 	var responseBody ResponseBody
 	err = json.Unmarshal(body, &responseBody)
 	if err != nil {
-		return "", fmt.Errorf("failed to unmarshal response body: %v", err)
+		return nil, fmt.Errorf("failed to unmarshal response body: %v", err)
 	}
 
 	log.Printf("Predicted class: %s", responseBody.PredictedClass)
 
-	return responseBody.PredictedClass, nil
+	return &responseBody, nil
 }
 
 func (u *FundusUsecase) DetectImage(p *request.DetectFundusImage) (*entities.Fundus, error) {
@@ -102,13 +103,17 @@ func (u *FundusUsecase) DetectImage(p *request.DetectFundusImage) (*entities.Fun
 	}
 
 	// Call machine learning API to detect fundus image
-	predictedClass, err := detectFundusImageAPI(p.FundusImage)
+	mlResponse, err := detectFundusImageAPI(u.mlApi, u.mlApiKey, p.FundusImage)
 	if err != nil {
 		return nil, err
 	}
 
+	if mlResponse.Error != "" {
+		return nil, errors.New(mlResponse.Error)
+	}
+
 	// Store image in VM
-	imagePath, err := helpers.StoreImage(p.FundusImage)
+	imagePath, err := helpers.StoreImage(mlResponse.CroppedImage)
 	if err != nil {
 		return nil, errors.New("failed to store image")
 	}
@@ -118,13 +123,14 @@ func (u *FundusUsecase) DetectImage(p *request.DetectFundusImage) (*entities.Fun
 		PatientID: p.PatientID,
 		ImagePath: imagePath,
 		Verified:  false,
-		Condition: predictedClass,
+		Condition: mlResponse.PredictedClass,
 	}
 
 	newFundus, err := u.fundusRepo.Create(fundus)
 	if err != nil {
 		return nil, err
 	}
+	newFundus.ImageBlob = mlResponse.CroppedImage
 
 	return newFundus, nil
 }

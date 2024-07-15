@@ -9,7 +9,9 @@ import (
 type Env struct {
 	AppPort   string `mapstructure:"APP_PORT"`
 	SecretKey string `mapstructure:"SECRET_KEY"`
-	MlApiKey  string `mapstructure:"ML_API_KEY"`
+
+	MlApi    string `mapstructure:"ML_API"`
+	MlApiKey string `mapstructure:"ML_API_KEY"`
 
 	DbDialect  string `mapstructure:"DB_DIALECT"`
 	DbHost     string `mapstructure:"DB_HOST"`

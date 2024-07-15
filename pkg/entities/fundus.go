@@ -6,6 +6,7 @@ type Fundus struct {
 	ID        int64             `json:"id"`
 	PatientID int64             `json:"patient_id"`
 	ImagePath string            `json:"image_path"`
+	ImageBlob string            `json:"image_blob,omitempty"`
 	Verified  bool              `json:"verified"`
 	Status    string            `json:"status"`
 	Condition string            `json:"condition"`

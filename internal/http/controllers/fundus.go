@@ -68,6 +68,7 @@ func (c *FundusController) DetectImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Encode image to base64
 	req := request.DetectFundusImage{
 		PatientID:   user.ID,
 		FundusImage: base64.StdEncoding.EncodeToString(fileBytes),
@@ -82,10 +83,19 @@ func (c *FundusController) DetectImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	resData := response.Fundus{
+		ID:        newFundus.ID,
+		ImageBlob: newFundus.ImageBlob,
+		Verified:  newFundus.Verified,
+		Status:    newFundus.Status,
+		Condition: newFundus.Condition,
+		CreatedAt: newFundus.CreatedAt.Format("2006-01-02 15:04:05"),
+	}
+
 	res := response.Response{
 		Status:  "success",
 		Message: "Detect fundus success",
-		Data:    newFundus,
+		Data:    resData,
 	}
 
 	helpers.SendResponse(w, res, http.StatusCreated)

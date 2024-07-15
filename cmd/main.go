@@ -34,7 +34,7 @@ func main() {
 	aptUsecase := usecases.NewAppointmentUsecase(aptRepo)
 	doctorUsecase := usecases.NewDoctorUsecase(doctorRepo)
 	facilityUsecase := usecases.NewHealthFacilityUsecase(facilityRepo)
-	fundusUsecase := usecases.NewFundusUsecase(env.MlApiKey, fundusRepo, userRepo)
+	fundusUsecase := usecases.NewFundusUsecase(env.MlApi, env.MlApiKey, fundusRepo, userRepo)
 	userUsecase := usecases.NewUserUsecase(userRepo)
 
 	authController := controllers.NewAuthController(authUsecase)

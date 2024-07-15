@@ -5,12 +5,12 @@ import "github.com/OptiGuard-PKMKC/optiguard_backend/pkg/entities"
 type (
 	Fundus struct {
 		ID        int64                     `json:"id"`
-		ImageURL  string                    `json:"image_url"`
+		ImageBlob string                    `json:"image_blob"`
 		Verified  bool                      `json:"verified"`
 		Status    string                    `json:"status"`
 		Condition string                    `json:"condition"`
 		CreatedAt string                    `json:"created_at"`
-		Details   []entities.FundusDetail   `json:"details"`
+		UpdatedAt string                    `json:"updated_at,omitempty"`
 		Feedbacks []entities.FundusFeedback `json:"feedbacks,omitempty"`
 	}
 
