@@ -26,10 +26,10 @@ type ResponseData struct {
 }
 
 type ResponseBody struct {
-	Success bool          `json:"success"`
-	Message string        `json:"message,omitempty"`
-	Error   string        `json:"error,omitempty"`
-	Data    *ResponseData `json:"data,omitempty"`
+	Success bool         `json:"success"`
+	Message string       `json:"message,omitempty"`
+	Error   string       `json:"error,omitempty"`
+	Data    ResponseData `json:"data,omitempty"`
 }
 
 type FundusUsecase struct {
@@ -97,32 +97,32 @@ func detectFundusImageAPI(mlApi string, mlApiKey string, imageBlob string) (*Res
 	return &responseBody, nil
 }
 
-func (u *FundusUsecase) DetectImage(p *request.DetectFundusImage) (*entities.Fundus, *string, error) {
+func (u *FundusUsecase) DetectImage(p *request.DetectFundusImage) (*entities.Fundus, string, error) {
 	validPatient, err := u.userRepo.FindByIDAndRole(p.PatientID, "patient")
 	if err != nil {
 		log.Printf("Error finding patient: %v", err)
-		return nil, nil, err
+		return nil, "", err
 	}
 
 	if validPatient == nil {
-		return nil, nil, errors.New("user id is not a patient")
+		return nil, "", errors.New("user id is not a patient")
 	}
 
 	// Call machine learning API to detect fundus image
 	mlResponse, err := detectFundusImageAPI(u.mlApi, u.mlApiKey, p.FundusImage)
 	if err != nil {
-		return nil, nil, err
+		return nil, "", err
 	}
 
-	// Check if the predicted class is not fundus
-	if mlResponse.Data == nil {
-		return nil, &mlResponse.Message, nil
+	// Check if detected class is empty
+	if mlResponse.Data.PredictedClass == "" {
+		return nil, mlResponse.Message, nil
 	}
 
 	// Store image in VM
 	imagePath, err := helpers.StoreImage(mlResponse.Data.CroppedImage)
 	if err != nil {
-		return nil, nil, errors.New("failed to store image")
+		return nil, "", errors.New("failed to store image")
 	}
 
 	// Create fundus record in database
@@ -135,11 +135,11 @@ func (u *FundusUsecase) DetectImage(p *request.DetectFundusImage) (*entities.Fun
 
 	newFundus, err := u.fundusRepo.Create(fundus)
 	if err != nil {
-		return nil, nil, err
+		return nil, "", err
 	}
 	newFundus.ImageBlob = mlResponse.Data.CroppedImage
 
-	return newFundus, nil, nil
+	return newFundus, "", nil
 }
 
 func (u *FundusUsecase) ViewFundus(fundusID int64) (*entities.Fundus, error) {

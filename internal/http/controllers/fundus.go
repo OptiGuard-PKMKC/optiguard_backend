@@ -83,10 +83,10 @@ func (c *FundusController) DetectImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if message != nil {
+	if message != "" {
 		helpers.SendResponse(w, response.Response{
 			Status:  "success",
-			Message: *message,
+			Message: message,
 		}, http.StatusOK)
 		return
 	}
