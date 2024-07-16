@@ -74,12 +74,20 @@ func (c *FundusController) DetectImage(w http.ResponseWriter, r *http.Request) {
 		FundusImage: base64.StdEncoding.EncodeToString(fileBytes),
 	}
 
-	newFundus, err := c.fundusUsecase.DetectImage(&req)
+	newFundus, message, err := c.fundusUsecase.DetectImage(&req)
 	if err != nil {
 		helpers.SendResponse(w, response.Response{
 			Status: "error",
 			Error:  err.Error(),
 		}, http.StatusBadRequest)
+		return
+	}
+
+	if message != nil {
+		helpers.SendResponse(w, response.Response{
+			Status:  "success",
+			Message: *message,
+		}, http.StatusOK)
 		return
 	}
 

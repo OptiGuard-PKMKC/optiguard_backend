@@ -20,10 +20,16 @@ type RequestBody struct {
 	FundusImage string `json:"fundus_image"`
 }
 
+type ResponseData struct {
+	PredictedClass string `json:"predicted_class"`
+	CroppedImage   string `json:"cropped_image"`
+}
+
 type ResponseBody struct {
-	Error          string `json:"error,omitempty"`
-	PredictedClass string `json:"predicted_class,omitempty"`
-	CroppedImage   string `json:"cropped_image,omitempty"`
+	Success bool          `json:"success"`
+	Message string        `json:"message,omitempty"`
+	Error   string        `json:"error,omitempty"`
+	Data    *ResponseData `json:"data,omitempty"`
 }
 
 type FundusUsecase struct {
@@ -86,36 +92,37 @@ func detectFundusImageAPI(mlApi string, mlApiKey string, imageBlob string) (*Res
 		return nil, fmt.Errorf("failed to unmarshal response body: %v", err)
 	}
 
-	log.Printf("Predicted class: %s", responseBody.PredictedClass)
+	log.Printf("Predicted class: %s", responseBody.Data.PredictedClass)
 
 	return &responseBody, nil
 }
 
-func (u *FundusUsecase) DetectImage(p *request.DetectFundusImage) (*entities.Fundus, error) {
+func (u *FundusUsecase) DetectImage(p *request.DetectFundusImage) (*entities.Fundus, *string, error) {
 	validPatient, err := u.userRepo.FindByIDAndRole(p.PatientID, "patient")
 	if err != nil {
 		log.Printf("Error finding patient: %v", err)
-		return nil, err
+		return nil, nil, err
 	}
 
 	if validPatient == nil {
-		return nil, errors.New("user id is not a patient")
+		return nil, nil, errors.New("user id is not a patient")
 	}
 
 	// Call machine learning API to detect fundus image
 	mlResponse, err := detectFundusImageAPI(u.mlApi, u.mlApiKey, p.FundusImage)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	if mlResponse.Error != "" {
-		return nil, errors.New(mlResponse.Error)
+	// Check if the predicted class is not fundus
+	if mlResponse.Data == nil {
+		return nil, &mlResponse.Message, nil
 	}
 
 	// Store image in VM
-	imagePath, err := helpers.StoreImage(mlResponse.CroppedImage)
+	imagePath, err := helpers.StoreImage(mlResponse.Data.CroppedImage)
 	if err != nil {
-		return nil, errors.New("failed to store image")
+		return nil, nil, errors.New("failed to store image")
 	}
 
 	// Create fundus record in database
@@ -123,16 +130,16 @@ func (u *FundusUsecase) DetectImage(p *request.DetectFundusImage) (*entities.Fun
 		PatientID: p.PatientID,
 		ImagePath: imagePath,
 		Verified:  false,
-		Condition: mlResponse.PredictedClass,
+		Condition: mlResponse.Data.PredictedClass,
 	}
 
 	newFundus, err := u.fundusRepo.Create(fundus)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	newFundus.ImageBlob = mlResponse.CroppedImage
+	newFundus.ImageBlob = mlResponse.Data.CroppedImage
 
-	return newFundus, nil
+	return newFundus, nil, nil
 }
 
 func (u *FundusUsecase) ViewFundus(fundusID int64) (*entities.Fundus, error) {
